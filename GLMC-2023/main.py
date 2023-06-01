@@ -72,6 +72,7 @@ def get_dataset(args):
         trainset = dataset_lt_data.LT_Dataset(args.root, args.dir_train_txt, util.TwoCropTransform(transform_train))
         testset = dataset_lt_data.LT_Dataset(args.root, args.dir_test_txt,transform_val)
         return trainset,testset
+        
     if args.dataset == 'nepes':
         exp_start_date_time = datetime.datetime.now(timezone('Asia/Seoul')).strftime("%Y-%m-%d_%H:%M:%S")
         args.save_path = os.path.join('./output/nepes/', exp_start_date_time)

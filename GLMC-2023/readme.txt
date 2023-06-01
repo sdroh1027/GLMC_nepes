@@ -11,6 +11,7 @@ Best Prec@1: 70.309
 * 데이터셋은 nepes_dataset_description_v3.txt에 적혀있던 대로 17개 클래스로 줄였습니다
 * 앞으로 할 것: ResNet-50에서 한번 더 돌려보기, 하이퍼파라미터 최적화, 에포크 증가,..
 * + 다시보니 resnext50_32x4d.. resnet50으로 수정
++ 정확도 class별로 뽑아보기
 
 => creating model 'resnet50'
   + Number of params: 24.16M
