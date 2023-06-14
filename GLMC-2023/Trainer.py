@@ -16,6 +16,8 @@ import math
 from sklearn.metrics import confusion_matrix
 from loss import *
 import warnings
+import pandas as pd
+import matplotlib as plt
 
 class Trainer(object):
     def __init__(self, args, model=None,train_loader=None, val_loader=None,weighted_train_loader=None,per_class_num=[],log=None):
@@ -208,16 +210,16 @@ class Trainer(object):
                         i, len(self.val_loader), batch_time=batch_time, top1=top1, top5=top5))
                     print(output)
             cf = confusion_matrix(all_targets, all_preds).astype(float)
+            pdb.set_trace()
             cls_cnt = cf.sum(axis=1)
             cls_hit = np.diag(cf)
-            cls_acc = cls_hit / cls_cnt
+            cls_acc = cls_hit / cls_cnt #클래스별 정확도
             output = ('EPOCH: {epoch} {flag} Results: Prec@1 {top1.avg:.3f} Prec@5 {top5.avg:.3f}'.format(epoch=epoch + 1 , flag='val', top1=top1, top5=top5))
 
             self.log.info(output)
             out_cls_acc = '%s Class Accuracy: %s' % (
             'val', (np.array2string(cls_acc, separator=',', formatter={'float_kind': lambda x: "%.3f" % x})))
 
-            #pdb.set_trace()
             many_shot = self.cls_num_list > 100 
             medium_shot = (self.cls_num_list <= 100) & (self.cls_num_list > 20)
             few_shot = self.cls_num_list <= 20
@@ -255,3 +257,15 @@ class Trainer(object):
 
 
 
+def save_confusion_matrix(args, confusion_matrix, epoch, filename):
+    if not hasattr(args, 'class_name'):
+        args.class_name = [i for i in range(args.classes)]
+    # draw confusion matrix
+    df_cm = pd.DataFrame(confusion_matrix.cpu().numpy(), index=[i for i in args.class_name],
+                         columns=[i for i in args.class_name])
+    fig = plt.figure(figsize=(9, 7))
+    sn.heatmap(df_cm, annot=True, fmt='g')
+    plt.title('Confusion Matrix_ep' + str(epoch))
+    # plt.show()
+    plt.savefig(os.path.join(args.save_path, 'confusion_matrix_' + filename + '.png'))
+    plt.close(fig)

@@ -25,6 +25,7 @@ from sklearn.metrics import confusion_matrix
 import warnings
 from Trainer import Trainer
 from pytz import timezone
+import resnet as models
 
 
 
@@ -32,13 +33,20 @@ from pytz import timezone
 best_acc1 = 0
 
 def get_model(args):
-    if args.dataset == "ImageNet-LT" or args.dataset == "iNaturelist2018" or args.dataset=="nepes":
+    if args.dataset == "ImageNet-LT" or args.dataset == "iNaturelist2018":
         print("=> creating model '{}'".format('resnext50_32x4d'))
         net = Resnet_LT.resnext50_32x4d(num_classes=args.num_classes)
         return net
     else:
         print("=> creating model '{}'".format(args.arch))
-        if args.arch == 'resnet50':
+        if args.dataset == 'nepes':
+            net = models.build_resnet(args, 'resnet50','fanin')
+            # if not imagenet 1k, modify classifier and reinitialize parameters
+            if net.fc.out_features != args.num_classes:
+                fc_in = net.fc.in_features
+                net.fc = nn.Linear(fc_in, args.num_classes)
+                net.fc.reset_parameters()
+        elif args.arch == 'resnet50':
             net = ResNet_cifar.resnet50(num_class=args.num_classes)
         elif args.arch == 'resnet18':
             net = ResNet_cifar.resnet18(num_class=args.num_classes)
@@ -46,6 +54,9 @@ def get_model(args):
             net = ResNet_cifar.resnet32(num_class=args.num_classes)
         elif args.arch == 'resnet34':
             net = ResNet_cifar.resnet34(num_class=args.num_classes)
+        elif args.arch == 'resnext50':
+            print("=> creating model '{}'".format('resnext50_32x4d'))
+            net = Resnet_LT.resnext50_32x4d(num_classes=args.num_classes)
         return net
 
 def get_dataset(args):

@@ -17,7 +17,7 @@ import torch
 import pdb
 
 import sys
-sys.path.insert(0, '/home/user/jihee/GLMC/GLMC-2023/imbalance_data')
+sys.path.insert(0, '/home/esoc/jihee/GLMC_nepes/GLMC-2023/imbalance_data')
 
 from albumentation import (
    Normalize,
@@ -63,7 +63,7 @@ def create_dataset(args, data_root, is_train: bool, transform):
     
     if not os.path.exists(args.save_path):
         os.makedirs(args.save_path, exist_ok=True)
-    path = args.save_path + '/train_val_lists.p'
+    #path = args.save_path + '/train_val_lists.p'
 
     if True:
         #assert os.path.isfile(path) is False, 'ERROR: you are trying to reset file \'train_val_lists.p\'. this will mess up the whole experiment.' \
@@ -101,11 +101,11 @@ def create_dataset(args, data_root, is_train: bool, transform):
                 train_list += [(os.path.join(data_root, c, f), classes[c]) for f in file_list[:int(0.9*length)]]
                 val_list += [(os.path.join(data_root, c, f), classes[c]) for f in file_list[int(0.9*length):]]
 
-        datapath_dict = {'train': train_list, 'val': val_list, 'class_name': classes_list, 'num_data_cls': num_data}
+        #datapath_dict = {'train': train_list, 'val': val_list, 'class_name': classes_list, 'num_data_cls': num_data}
         args.num_data_cls = num_data
         args.class_name = classes_list
-        with open(path, 'wb') as file:
-            pickle.dump(datapath_dict, file)
+        #with open(path, 'wb') as file:
+        #    pickle.dump(datapath_dict, file)
 
     #train_list: [(-.jpg, class label) (-.jpg, class label) ...]
 
@@ -132,7 +132,6 @@ class BasicDataset(Dataset):
             for i in range(len(self.path_list)):
                 img, c = self.path_list[i]
                 img = Image.open(img)
-                # img1 = np.array(img)
                 data_list.append((img, c))
                 self.targets.append(c)
             self.data_list = data_list
@@ -155,12 +154,9 @@ class BasicDataset(Dataset):
         else:
             path, c = self.path_list[index]
             img = Image.open(path) #<class 'PIL.Image.Image'>
-            #img = np.array(img)
-            
+
         if self.transform:
             img = self.transform(img) #type(img): dict, img['image'].shape: (256, 256, 3), ndarray type
-            #img = torch.tensor(img['image'])
-        #img = np.array(img.float()).transpose((2,0,1))
         return img, c
 
     def __len__(self):
