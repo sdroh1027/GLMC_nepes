@@ -68,7 +68,7 @@ class Trainer(object):
                 input_org_1 = inputs[0]
                 input_org_2 = inputs[1]
                 target_org = targets
-
+ 
                 try:
                     input_invs, target_invs = next(weighted_train_loader)
                 except:
@@ -210,7 +210,7 @@ class Trainer(object):
                         i, len(self.val_loader), batch_time=batch_time, top1=top1, top5=top5))
                     print(output)
             cf = confusion_matrix(all_targets, all_preds).astype(float)
-            pdb.set_trace()
+
             cls_cnt = cf.sum(axis=1)
             cls_hit = np.diag(cf)
             cls_acc = cls_hit / cls_cnt #클래스별 정확도
