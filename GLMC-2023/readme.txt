@@ -20,3 +20,6 @@ Best Prec@1: 70.309
 
 ======================================================================================
 
+* model resnet50으로 변경 완료
+* 실행 명령어 (3090*2 서버)
+python main.py --dataset nepes -a resnet50 --num_classes 10 --beta 0.5 --lr 0.01 --epochs 2000 -b 64 --momentum 0.9 --weight_decay 5e-3 --resample_weighting 0.0 --label_weighting 1.2 --contrast_weight 4 --root /home/esoc/camtek_v3_train_valid_2

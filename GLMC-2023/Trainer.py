@@ -262,7 +262,7 @@ def save_confusion_matrix(args, confusion_matrix, epoch, filename):
         args.class_name = [i for i in range(args.classes)]
     # draw confusion matrix
     df_cm = pd.DataFrame(confusion_matrix.cpu().numpy(), index=[i for i in args.class_name],
-                         columns=[i for i in args.class_name])
+                         columns=[i for  i in args.class_name])
     fig = plt.figure(figsize=(9, 7))
     sn.heatmap(df_cm, annot=True, fmt='g')
     plt.title('Confusion Matrix_ep' + str(epoch))
