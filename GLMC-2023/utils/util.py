@@ -231,7 +231,7 @@ def get_transform(args, dataset):
         
         else:
             transform_train = transforms.Compose([
-                transforms.Resize(256),
+                transforms.Resize((256,256)),
                 transforms.RandomCrop(256, padding=32),
                 transforms.RandomHorizontalFlip(),
                 transforms.ToTensor(),
@@ -239,10 +239,10 @@ def get_transform(args, dataset):
             ])
 
         transform_val = transforms.Compose([
-            transforms.Resize(256),
-            #transforms.CenterCrop(224),
-            transforms.ToTensor(),
-            normalize])
+                transforms.Resize((256,256)),
+                #transforms.CenterCrop(224),
+                transforms.ToTensor(),
+                normalize])
 
         return transform_train, transform_val
 

@@ -19,22 +19,22 @@ import pdb
 import sys
 sys.path.insert(0, '/home/esoc/jihee/GLMC_nepes/GLMC-2023/imbalance_data')
 
-from albumentation import (
-   Normalize,
-   Blur,
-   GridDistortion,
-   ElasticTransform,
-   ColorJitter,
-   ShiftScaleRotate,
-   Transpose,
-   RandomRotate90,
-   Sharpen,
+from albumentations import (
+    Normalize,
+    Blur,
+    GridDistortion,
+    ElasticTransform,
+    ColorJitter,
+    ShiftScaleRotate,
+    Transpose,
+    RandomRotate90,
+    Sharpen,
     MedianBlur,
     MultiplicativeNoise,
     JpegCompression,
     RandomGridShuffle,
     Resize,
-    ToTensor,
+    #ToTensor,
     CenterCrop,
 )
 
@@ -127,7 +127,7 @@ class BasicDataset(Dataset):
         self.targets = []
 
         data_list = []
-        if len(self.path_list) < 10000:
+        if len(self.path_list) < 10000 and False:
             # if the size of dataset is small, load all of them for faster speed
             for i in range(len(self.path_list)):
                 img, c = self.path_list[i]
@@ -138,7 +138,11 @@ class BasicDataset(Dataset):
         else:
             # if the size of dataset is big, load a batch at each iteration
             self.data_list = None
-            
+            for i in range(len(self.path_list)):
+                img, c = self.path_list[i]
+                #img = Image.open(img)
+                #data_list.append((img, c))
+                self.targets.append(c)
         
         class_list = np.zeros(args.num_classes)
         for i in range(len(self.path_list)):

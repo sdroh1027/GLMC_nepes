@@ -90,6 +90,7 @@ def get_dataset(args):
         
         trainset = nepes.create_dataset(args, args.root, True, util.TwoCropTransform(transform_train))
         testset = nepes.create_dataset(args, args.root, False, transform_val)
+        assert len(set([a for a, b in trainset.path_list]) & set([a for a, b in testset.path_list])) == 0
         return trainset,testset
     
 
@@ -148,6 +149,16 @@ def main_worker(gpu, args):
             print("=> loaded checkpoint '{}' (epoch {})".format(args.resume, checkpoint['epoch']))
         else:
             print("=> no checkpoint found at '{}'".format(args.resume))
+    else:
+        print("get pretrained model state from torchvision")
+        import torchvision.models as torchvision_models
+        pretrained_weights = torchvision_models.resnet50(pretrained=True).state_dict()
+        pretrained_weights = {f"module.{key}": value for key, value in pretrained_weights.items()}
+        del pretrained_weights['module.fc.weight']
+        del pretrained_weights['module.fc.bias']
+        #sd = model.state_dict()
+        model.load_state_dict(pretrained_weights, strict=False)
+
     log_format = '%(asctime)s %(message)s'
     logging.basicConfig(stream=sys.stdout, level=logging.INFO, format=log_format, datefmt='%m/%d %I:%M:%S %p')
     fh = logging.FileHandler(os.path.join(args.root_log + args.store_name, 'log.txt'))
@@ -179,12 +190,14 @@ def main_worker(gpu, args):
     samples_weight = torch.from_numpy(samples_weight)
     samples_weight = samples_weight.double()
     weighted_sampler = torch.utils.data.WeightedRandomSampler(samples_weight, len(samples_weight),replacement=True)
-    weighted_train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=args.batch_size,num_workers=args.workers, persistent_workers=True,pin_memory=True,sampler=weighted_sampler)
+    weighted_train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=args.batch_size, num_workers=args.workers,
+                                                        persistent_workers=True, pin_memory=True, sampler=weighted_sampler)
 
     cls_num_list_cuda = torch.from_numpy(np.array(cls_num_list)).float().cuda()
     start_time = time.time()
     print("Training started!")
-    trainer = Trainer(args, model=model,train_loader=train_loader, val_loader=val_loader,weighted_train_loader=weighted_train_loader, per_class_num=train_cls_num_list,log=logging)
+    trainer = Trainer(args, model=model, train_loader=train_loader, val_loader=val_loader,
+               weighted_train_loader=weighted_train_loader, per_class_num=train_cls_num_list, log=logging)
     trainer.train()
     end_time = time.time()
     print("It took {} to execute the program".format(hms_string(end_time - start_time)))
@@ -210,7 +223,7 @@ if __name__ == '__main__':
     parser.add_argument('--seed', default=3407, type=int, help='seed for initializing training. ')
     parser.add_argument('-p', '--print_freq', default=1000, type=int, metavar='N',help='print frequency (default: 100)')
     parser.add_argument('--gpu', default=None, type=int,help='GPU id to use.')
-    parser.add_argument('-j', '--workers', default=4, type=int, metavar='N',help='number of data loading workers (default: 4)')
+    parser.add_argument('-j', '--workers', default=8, type=int, metavar='N',help='number of data loading workers (default: 4)')
     parser.add_argument('--resume', default=None, type=str, metavar='PATH',help='path to latest checkpoint (default: none)')
     parser.add_argument('--start-epoch', default=0, type=int, metavar='N',help='manual epoch number (useful on restarts)')
     parser.add_argument('--root_log', type=str, default='./output/')
